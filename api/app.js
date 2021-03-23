@@ -8,6 +8,9 @@ var personRouter = require('./routes/person');
 
 var app = express();
 
+const basicAuth = require('express-basic-auth');
+app.use(basicAuth({users: { 'Automaatti123': 'Salasana123' }}))
+
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
