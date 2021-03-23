@@ -9,7 +9,8 @@ router.get('/:id?',
       if (err) {
         response.json(err);
       } else {
-        response.json(dbResult);
+        // [0] = palautetaan json objekti, eli ainoa alkio, ei koko arrayta!
+        response.json(dbResult[0]);
       }
     });
   } else {
@@ -28,7 +29,21 @@ function(request, response) {
     if (err) {
       response.json(err);
     } else {
-      response.json(request.body); 
+      //  tietokannan tietueen sijaan (dbResult) voidaan antaa myös tekstivastaus ("teksti").
+      response.json("Person added."); 
+    }
+  });
+});
+
+//  Proseduurin "money_action" lisäys.
+router.post('/money_action', 
+function(request, response) {
+  person.moneyAction(request.body, function(err, dbResult) {
+    if (err) {
+      response.json(err);
+    } else {
+      //  tietokannan tietueen sijaan (dbResult) voidaan antaa myös tekstivastaus ("teksti").
+      response.json(dbResult); 
     }
   });
 });
@@ -51,7 +66,16 @@ function(request, response) {
     if (err) {
       response.json(err);
     } else {
-      response.json(dbResult);
+      //  Lisätään virhetila jos KO tietuetta ei ole.
+      console.log(dbResult);
+      if(dbResult.affectedRows==1){
+        //  tietokannan tietueen sijaan (dbResult) voidaan antaa myös tekstivastaus ("teksti").
+        response.json("Person updated");
+      }
+      else{
+        response.json("Does not exist!");
+      }
+      
     }
   });
 });
