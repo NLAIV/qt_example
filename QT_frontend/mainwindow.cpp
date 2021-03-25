@@ -61,17 +61,25 @@ void MainWindow::allPersonsSlot(QNetworkReply *reply)
 void MainWindow::on_getOneButton_clicked()
 {
     QString id = ui->lineEditId->text();
-    QString site_url="http://localhost:3000/example/oneperson/"+id;
-    QString credentials="Automaatti123:Salasana123";
-    QNetworkRequest request((site_url));
-    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
-    QByteArray data = credentials.toLocal8Bit().toBase64();
-    QString headerData = "Basic " + data;
-    request.setRawHeader( "Authorization", headerData.toLocal8Bit() );
-    onePersonManager = new QNetworkAccessManager(this);
-    connect(onePersonManager, SIGNAL(finished (QNetworkReply*)),
-    this, SLOT(onePersonSlot(QNetworkReply*)));
-    onePersonReply = onePersonManager->get(request);
+    if(id=="")
+    {
+        ui->resultlabel->setText("Please give valid ID.");
+    }
+    else
+    {
+        QString site_url="http://localhost:3000/example/oneperson/"+id;
+        QString credentials="Automaatti123:Salasana123";
+        QNetworkRequest request((site_url));
+        request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+        QByteArray data = credentials.toLocal8Bit().toBase64();
+        QString headerData = "Basic " + data;
+        request.setRawHeader( "Authorization", headerData.toLocal8Bit() );
+        onePersonManager = new QNetworkAccessManager(this);
+        connect(onePersonManager, SIGNAL(finished (QNetworkReply*)),
+        this, SLOT(onePersonSlot(QNetworkReply*)));
+        onePersonReply = onePersonManager->get(request);
+    }
+
 }
 
 void MainWindow::onePersonSlot(QNetworkReply *reply)
@@ -106,6 +114,12 @@ void MainWindow::onePersonSlot(QNetworkReply *reply)
 void MainWindow::on_nameButton_clicked()
 {
     QString id = ui->lineEditId->text();
+    if(id=="")
+    {
+        ui->resultlabel->setText("Please give valid ID.");
+    }
+    else
+    {
     QString site_url="http://localhost:3000/example/fullname/"+id;
     QString credentials="Automaatti123:Salasana123";
     QNetworkRequest request((site_url));
@@ -117,6 +131,7 @@ void MainWindow::on_nameButton_clicked()
     connect(fullNameManager, SIGNAL(finished (QNetworkReply*)),
     this, SLOT(fullNameSlot(QNetworkReply*)));
     fullNameReply = fullNameManager->get(request);
+    }
 }
 
 void MainWindow::fullNameSlot(QNetworkReply *reply)
@@ -142,5 +157,59 @@ void MainWindow::fullNameSlot(QNetworkReply *reply)
     fullNameReply->deleteLater();
     reply->deleteLater();
     fullNameManager->deleteLater();
+}
+
+
+void MainWindow::on_actionButton_clicked()
+{
+    QString id = ui->lineEditId->text();
+    QString amount = ui->lineEditAmount->text();
+    if(id=="")
+    {
+        ui->resultlabel->setText("Please give valid ID.");
+    }
+    else if(amount=="")
+    {
+        ui->resultlabel->setText("Please give valid amount.");
+    }
+    else
+    {
+    QJsonObject json_obj;
+    json_obj.insert("id",id);
+    json_obj.insert("amount",amount);
+    QString site_url="http://localhost:3000/person/money_action";
+    QString credentials="Automaatti123:Salasana123";
+    QNetworkRequest request(site_url);
+    request.setHeader(QNetworkRequest::ContentTypeHeader,"application/json");
+    QByteArray data = credentials.toLocal8Bit().toBase64();
+    QString headerData = "Basic " + data;
+    request.setRawHeader( "Authorization", headerData.toLocal8Bit() );
+    raiseManager = new QNetworkAccessManager(this);
+    connect(raiseManager, SIGNAL(finished (QNetworkReply*)),
+    this, SLOT(raiseSlot(QNetworkReply*)));
+    raiseReply = raiseManager->post(request, QJsonDocument(json_obj).toJson());
+    }
+}
+
+void MainWindow::raiseSlot(QNetworkReply *reply)
+{
+    QByteArray response_data=reply->readAll();
+    qDebug() << response_data;
+    if(response_data.compare("-4078")==0)
+    {
+        ui->resultlabel->setText("Error in database connection.");
+    }
+    else if(response_data.compare("0")==0)
+    {
+        ui->resultlabel->setText("Request could not be completed.");
+    }
+    else
+    {
+        ui->resultlabel->setText("Request completed.");
+    }
+
+    raiseReply->deleteLater();
+    reply->deleteLater();
+    raiseManager->deleteLater();
 }
 
