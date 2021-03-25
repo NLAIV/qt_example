@@ -43,7 +43,7 @@ function(request, response) {
       response.json(err);
     } else {
       //  tietokannan tietueen sijaan (dbResult) voidaan antaa myös tekstivastaus ("teksti").
-      response.json(dbResult); 
+      response.json(dbResult.affectedRows); 
     }
   });
 });
